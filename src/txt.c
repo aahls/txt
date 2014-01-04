@@ -77,13 +77,12 @@ int main(int argc, char **argv){
             printf("\x1b[0m");
         }
     }else{
-        char text[TEXT_MAXLEN]="";
         int i;
+        note=make_note("");
         for(i=optind;i<argc;i++){
-            strncat(text, argv[i], TEXT_MAXLEN-strlen(text));
-            strncat(text, " ", TEXT_MAXLEN-strlen(text));
+            append_note_text(&note, argv[i]);
+            append_note_text(&note, " ");
         }
-        note=make_note(text);
         note.importance=importance;
         add_note(&db, note);
     }

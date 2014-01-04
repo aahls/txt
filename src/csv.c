@@ -31,7 +31,8 @@ note_db_t load_db(const char *filename){
         char *text=strsep(&buffer, "\t");
         if(buffer==NULL)
             break;
-        strncpy(note.text, text, TEXT_MAXLEN);
+        note=make_note("");
+        set_note_text(&note, text);
         note.importance=atoi(strsep(&buffer, "\t"));
         note.created=atoi(strsep(&buffer, "\n"));
         //Will automatically generate an ID

@@ -3,13 +3,11 @@
 #include <stdio.h>
 #include <time.h>
 
-#define TEXT_MAXLEN 1024
-
 enum sort_policy { IMPORTANCE, CREATED };
 
 struct note{
     int id;
-    char text[TEXT_MAXLEN];
+    char *text;
     int importance;
     time_t created;
 };
@@ -26,6 +24,9 @@ note_t make_note(const char *text);
 
 note_t* get_note(note_db_t *db, int i);
 note_t* get_note_id(note_db_t *db, int id);
+
+void set_note_text(note_t *note, const char *text);
+void append_note_text(note_t *note, const char *text);
 
 note_db_t empty_db(void);
 note_db_t load_db(const char *filename);

@@ -7,11 +7,23 @@
 
 note_t make_note(const char *text){
     note_t note;
-    strncpy(note.text, text, TEXT_MAXLEN);
+    note.text=malloc(1);
+    set_note_text(&note, text);
     note.importance=5;
     note.id=-1; //This is later set to a valid value as it is added to a db
     note.created=time(0);
     return note;
+}
+
+void set_note_text(note_t *note, const char *text){
+    note->text=realloc(note->text, sizeof(char)*(strlen(text)+1));
+    strcpy(note->text, text);
+}
+
+void append_note_text(note_t *note, const char *text){
+    note->text=realloc(note->text, sizeof(char)*(strlen(text)+strlen(note->text)+2));
+    strcat(note->text, text);
+
 }
 
 note_db_t empty_db(){
@@ -23,6 +35,10 @@ note_db_t empty_db(){
 }
 
 void free_db(note_db_t *db){
+    int i;
+    for(i=0;i<db->len;i++){
+        free(db->notes[i].text);
+    }
     db->len=0;
     db->allocated=0;
     free(db->notes);
@@ -48,6 +64,8 @@ int add_note(note_db_t *db, note_t note){
 
 int del_note(note_db_t *db, int i){
     if(i<0 || i>=db->len) return 1;
+
+    free(db->notes[i].text);
 
     memmove(&((db->notes)[i]), &((db->notes)[i+1]),
                 sizeof(note_t)*(db->len-(i+1)));
