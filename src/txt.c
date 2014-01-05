@@ -92,7 +92,7 @@ int main(int argc, char **argv){
                 char date_string[20];
                 struct tm *time=localtime(&note.created);
                 strftime(date_string, 20, "%F %H:%M:%S",time);
-                printf("%2d\t%d\t%s\t%s\n",
+                printf("%2d %d %s %s\n",
                         note.id, note.importance,
                         date_string, note.text);
             }else{
