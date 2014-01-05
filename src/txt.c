@@ -89,9 +89,12 @@ int main(int argc, char **argv){
                 //ANSI red and bright
                 printf("\x1b[31m\x1b[1m");
             if(longout){
-                printf("%2d\t%d\t%d\t%s\n",
+                char date_string[100];
+                struct tm *time=localtime(&note.created);
+                strftime(date_string, 100, "%F %H:%M:%S",time);
+                printf("%2d\t%d\t%s\t%s\n",
                         note.id, note.importance,
-                        note.created, note.text);
+                        date_string, note.text);
             }else{
                 printf("%2d %s\n", note.id, note.text);
             }
