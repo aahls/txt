@@ -20,8 +20,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-//Save a note database as a CSV file, implements related prototypes in db.h
-//Actually uses tabs, not commas
+/*
+  Save a note database as a CSV file, implements related prototypes in db.h
+  Actually uses tabs, not commas
+
+  Does no error checking. Input is assumed to be correct and file permissions
+  are assumed to be okay. If this is not true, things *will* go wrong!
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +34,7 @@ THE SOFTWARE.
 
 #include "db.h"
 
+//TODO: Make sure bad input files fail gracefully
 note_db_t load_db(const char *filename){
     FILE* fp;
     note_db_t db=empty_db();
