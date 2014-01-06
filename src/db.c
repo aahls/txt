@@ -98,10 +98,14 @@ int del_note(note_db_t *db, int i){
 
 int del_note_id(note_db_t *db, int id){
     int i;
-    for(i=0;i<db->len;i++)
-        if(db->notes[i].id==id) del_note(db, i);
+    for(i=0;i<db->len;i++){
+        if(db->notes[i].id==id){
+            del_note(db, i);
+            return 0;
+        }
+    }
 
-    return 0;
+    return -1;
 }
 
 note_t* get_note(note_db_t *db, int i){

@@ -75,11 +75,13 @@ int main(int argc, char **argv){
         int i;
         for(i=optind;i<argc;i++){
             int id=atoi_altfail(argv[i]);
-            if(id==-1){
-                printf("Bad ID '%s' specified, ignoring", argv[i]);
+            if(id==-1 || id<0){
+                printf("Bad ID '%s' specified. Ignoring\n", argv[i]);
                 continue;
             }
-            del_note_id(&db, id);
+            if(del_note_id(&db, id)==-1){
+                printf("No note with ID %d found. Ignoring.\n", id);
+            }
         }
     }else if(argc==optind){
         int i;
