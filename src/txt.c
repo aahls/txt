@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include "db.h"
 
 #define VERSION     "1.0.0" 
+#define NOTESFILE   ".txtdb.csv"
 
 int atoi_altfail(const char *str);
 void print_usage(void);
@@ -44,8 +45,9 @@ int main(int argc, char **argv){
     note_db_t db;
     note_t note;
 
-    if(access("notes.csv", F_OK) != -1)
-        db=load_db("notes.csv");
+    chdir(getenv("HOME"));
+    if(access(NOTESFILE, F_OK) != -1)
+        db=load_db(NOTESFILE);
     else
         db=empty_db();
 
@@ -114,7 +116,7 @@ int main(int argc, char **argv){
         add_note(&db, note);
     }
 
-    save_db(&db, "notes.csv");
+    save_db(&db, NOTESFILE);
     free_db(&db);
 
     return 0;
