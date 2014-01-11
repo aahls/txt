@@ -40,6 +40,9 @@ int main(int argc, char **argv){
 
     int importance=5;
 
+    int invert_order=0;
+    enum sort_policy sort=ID;
+
     char opt;
 
     note_db_t db;
@@ -51,7 +54,7 @@ int main(int argc, char **argv){
     else
         db=empty_db();
 
-    while((opt=getopt(argc, argv, "vlri:")) != -1){
+    while((opt=getopt(argc, argv, "vlri:Is:")) != -1){
         switch(opt){
             case 'v':
                 printf("txt v%s\n", VERSION);
@@ -70,6 +73,22 @@ int main(int argc, char **argv){
                     exit(9);
                 }
                 break;
+            case 's':
+                switch(optarg[0]){
+                    case 'c':
+                        sort=CREATED;
+                        break;
+                    case 'i':
+                        sort=IMPORTANCE;
+                        break;
+                    default:
+                        puts("Unknown sorting policy. Ignoring.");
+                        break;
+                }
+                break;
+            case 'I':
+                invert_order=1;
+                break;
         }
     }
 
@@ -85,10 +104,14 @@ int main(int argc, char **argv){
                 printf("No note with ID %d found. Ignoring.\n", id);
             }
         }
+        save_db(&db, NOTESFILE);
     }else if(argc==optind){
         int i;
+        sort_notes(&db, sort);
         for(i=0;i<db.len;i++){
-            note=*get_note(&db, i);
+            if(invert_order) note=*get_note(&db, db.len-1-i);
+            else note=*get_note(&db, i);
+
             if(note.importance>7)
                 //ANSI red and bright
                 printf("\x1b[31m\x1b[1m");
@@ -114,9 +137,9 @@ int main(int argc, char **argv){
         }
         note.importance=importance;
         add_note(&db, note);
+        save_db(&db, NOTESFILE);
     }
 
-    save_db(&db, NOTESFILE);
     free_db(&db);
 
     return 0;

@@ -122,3 +122,26 @@ note_t* get_note_id(note_db_t *db, int id){
 
     return NULL;
 }
+
+void swap_notes(note_db_t *db, int a, int b){
+    note_t temp=db->notes[a];
+    db->notes[a]=db->notes[b];
+    db->notes[b]=temp;
+}
+
+int sort_notes(note_db_t *db, enum sort_policy policy){
+    int i, j;
+    if(db->len<2) return 0;
+    //For now, just use insertion sort
+    for(i=1;i<db->len;i++){
+        j=i;
+        while(j>0){
+            if(policy==IMPORTANCE && !(db->notes[j].importance<db->notes[j-1].importance)) break;
+            else if(policy==CREATED && !(db->notes[j].created<db->notes[j-1].created)) break;
+            else if(policy==ID && !(db->notes[j].id<db->notes[j-1].id)) break;
+            swap_notes(db, j, j-1);
+            j--;
+        }
+    }
+    return 0;
+}

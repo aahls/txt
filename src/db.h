@@ -25,7 +25,7 @@ THE SOFTWARE.
 #include <stdio.h>
 #include <time.h>
 
-enum sort_policy { IMPORTANCE, CREATED };
+enum sort_policy { IMPORTANCE, CREATED, ID };
 
 struct note{
     int id;
@@ -60,4 +60,4 @@ int add_note(note_db_t *db, note_t note);
 int del_note(note_db_t *db, int i);
 int del_note_id(note_db_t *db, int id);
 
-int sort_notes(note_db_t db, enum sort_policy policy, char inverted);
+int sort_notes(note_db_t *db, enum sort_policy policy);
