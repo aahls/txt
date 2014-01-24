@@ -33,6 +33,7 @@ THE SOFTWARE.
 
 int atoi_altfail(const char *str);
 void print_usage(void);
+int hash_str(const char *str, int variation);
 
 int main(int argc, char **argv){
     int remove=0;
@@ -129,9 +130,14 @@ int main(int argc, char **argv){
             //Disable all ANSI
             printf("\x1b[0m");
             for(tag_i=0;tag_i<note.ntags;tag_i++){
+                int fg, bg;
                 putchar(' ');
-                //ANSI reverse video
-                printf("\x1b[7m");
+                fg=(hash_str(note.tags[tag_i], 22))%8;
+                bg=(hash_str(note.tags[tag_i], 19))%8;
+                if(fg==bg){
+                    bg=(bg==7 ? bg+1 : bg-1);
+                }
+                printf("\x1b[%dm\x1b[%dm", 30+fg, 40+bg);
                 printf("#%s", note.tags[tag_i]);
                 //Disable all ANSI
                 printf("\x1b[0m");
@@ -172,4 +178,15 @@ int atoi_altfail(const char *str){
         }
     }
     return val;
+}
+
+int hash_str(const char *str, int variation){
+    int i, seed=256;
+    seed*=variation;
+    for(i=0;i<strlen(str);i++){
+        seed*=str[i];
+        seed+=str[i];
+    }
+    srand(seed);
+    return rand()%256;
 }
