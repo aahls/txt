@@ -57,12 +57,21 @@ note_db_t load_db(const char *filename){
     while(1){
         note_t note;
         char *text=strsep(&buffer, "\t");
+        char *tag;
         if(buffer==NULL)
             break;
         note=make_note("");
         set_note_text(&note, text);
         note.importance=atoi(strsep(&buffer, "\t"));
-        note.created=atoi(strsep(&buffer, "\n"));
+        note.created=atoi(strsep(&buffer, "\t"));
+
+        text=strsep(&buffer, "\n");
+        if(strlen(text)!=0){
+            while((tag=strsep(&text, " "))!=NULL){
+                add_tag(&note, tag);
+            }
+        }
+
         //Will automatically generate an ID
         //IDs are not preseved between runs since this is more practical
         note.id=-1;
@@ -78,7 +87,31 @@ int save_db(note_db_t *db, const char *filename){
     FILE *fp;
     fp=fopen(filename, "w");
     for(i=0;i<db->len;i++){
-        fprintf(fp, "%s\t%d\t%d\n", db->notes[i].text, db->notes[i].importance, (int)db->notes[i].created);
+        char *tagstr;
+        if(db->notes[i].ntags>0){
+            int tagstr_len=0, j;
+            for(j=0;j<db->notes[i].ntags;j++){
+                //Add one extra byte for space characters between tags
+                tagstr_len+=strlen(db->notes[i].tags[j])+1;
+            }
+            //Extra byte for NUL
+            tagstr=(char *) malloc(sizeof(char)*tagstr_len+1);
+            tagstr[0]='\0';
+            for(j=0;j<db->notes[i].ntags;j++){
+                strcat(tagstr, db->notes[i].tags[j]);
+                strcat(tagstr, " ");
+            }
+            //Replace final space with a NUL
+            tagstr[tagstr_len-1]='\0';
+        }else{
+            tagstr=(char *) malloc(sizeof(char));
+            tagstr[0]='\0';
+        }
+
+        fprintf(fp, "%s\t%d\t%d\t%s\n", db->notes[i].text,
+            db->notes[i].importance, (int)db->notes[i].created, tagstr);
+
+        free(tagstr);
     }
     fclose(fp);
     return 0;

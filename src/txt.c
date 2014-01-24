@@ -109,6 +109,7 @@ int main(int argc, char **argv){
         int i;
         sort_notes(&db, sort);
         for(i=0;i<db.len;i++){
+            int tag_i;
             if(invert_order) note=*get_note(&db, db.len-1-i);
             else note=*get_note(&db, i);
 
@@ -119,21 +120,35 @@ int main(int argc, char **argv){
                 char date_string[20];
                 struct tm *time=localtime(&note.created);
                 strftime(date_string, 20, "%F %H:%M:%S",time);
-                printf("%2d %d %s %s\n",
+                printf("%2d %d %s %s",
                         note.id, note.importance,
                         date_string, note.text);
             }else{
-                printf("%2d %s\n", note.id, note.text);
+                printf("%2d %s", note.id, note.text);
             }
             //Disable all ANSI
             printf("\x1b[0m");
+            for(tag_i=0;tag_i<note.ntags;tag_i++){
+                putchar(' ');
+                //ANSI reverse video
+                printf("\x1b[7m");
+                printf("#%s", note.tags[tag_i]);
+                //Disable all ANSI
+                printf("\x1b[0m");
+            }
+            putchar('\n');
         }
     }else{
         int i;
         note=make_note("");
         for(i=optind;i<argc;i++){
-            append_note_text(&note, argv[i]);
-            append_note_text(&note, " ");
+            if(argv[i][0]=='#'){
+                //Increment pointer to skip past hash
+                add_tag(&note, ++argv[i]);
+            }else{
+                append_note_text(&note, argv[i]);
+                append_note_text(&note, " ");
+            }
         }
         note.importance=importance;
         add_note(&db, note);

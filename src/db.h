@@ -32,6 +32,8 @@ struct note{
     char *text;
     int importance;
     time_t created;
+    int ntags;
+    char **tags;
 };
 typedef struct note     note_t;
 
@@ -61,3 +63,7 @@ int del_note(note_db_t *db, int i);
 int del_note_id(note_db_t *db, int id);
 
 int sort_notes(note_db_t *db, enum sort_policy policy);
+
+int add_tag(note_t *note, char *tag);
+int del_tag(note_t *note, char *tag);
+int has_tag(note_t *note, char *tag);

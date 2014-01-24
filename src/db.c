@@ -27,6 +27,8 @@ THE SOFTWARE.
 
 #include "db.h"
 
+static void free_note(note_t *note);
+
 note_t make_note(const char *text){
     note_t note;
     note.text=malloc(1);
@@ -34,6 +36,8 @@ note_t make_note(const char *text){
     note.importance=5;
     note.id=-1; //This is later set to a valid value as it is added to a db
     note.created=time(0);
+    note.ntags=0;
+    note.tags=malloc(sizeof(char *));
     return note;
 }
 
@@ -59,11 +63,20 @@ note_db_t empty_db(){
 void free_db(note_db_t *db){
     int i;
     for(i=0;i<db->len;i++){
-        free(db->notes[i].text);
+        free_note(&(db->notes[i]));
     }
     db->len=0;
     db->allocated=0;
     free(db->notes);
+}
+
+void free_note(note_t *note){
+    int i;
+    free(note->text);
+    for(i=0;i<note->ntags;i++){
+        free(note->tags[i]);
+    }
+    free(note->tags);
 }
 
 int add_note(note_db_t *db, note_t note){
@@ -87,7 +100,7 @@ int add_note(note_db_t *db, note_t note){
 int del_note(note_db_t *db, int i){
     if(i<0 || i>=db->len) return 1;
 
-    free(db->notes[i].text);
+    free_note(&(db->notes[i]));
 
     memmove(&((db->notes)[i]), &((db->notes)[i+1]),
                 sizeof(note_t)*(db->len-(i+1)));
@@ -143,5 +156,35 @@ int sort_notes(note_db_t *db, enum sort_policy policy){
             j--;
         }
     }
+    return 0;
+}
+
+int add_tag(note_t *note, char *tag){
+    if(has_tag(note, tag)) return 1;
+    note->tags=realloc(note->tags, sizeof(char *)*(note->ntags+1));
+    note->tags[note->ntags]=(char *) malloc((strlen(tag)+1)*sizeof(char));
+    strcpy(note->tags[note->ntags], tag);
+    note->ntags++;
+    return 0;
+}
+
+int del_tag(note_t *note, char *tag){
+    int i;
+    for(i=0;i<note->ntags;i++){
+        if(!strcmp(note->tags[i], tag)){
+            free(note->tags[i]);
+            memmove(note->tags[0], note->tags[i], note->ntags-i);
+            note->ntags--;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int has_tag(note_t *note, char *tag){
+    int i;
+    if(note->ntags==0) return 0;
+    for(i=0;i<note->ntags;i++)
+        if(!strcmp(note->tags[i], tag)) return 1;
     return 0;
 }
