@@ -132,15 +132,15 @@ int main(int argc, char **argv){
             for(tag_i=0;tag_i<note.ntags;tag_i++){
                 int fg, bg;
                 putchar(' ');
+
                 fg=(hash_str(note.tags[tag_i], 22))%8;
                 bg=(hash_str(note.tags[tag_i], 19))%8;
-                if(fg==bg){
-                    bg=(bg==7 ? bg+1 : bg-1);
-                }
+                if(fg==bg) bg=(bg==7 ? bg+1 : bg-1);
+
+                //ANSI: set foreground and background colors
                 printf("\x1b[%dm\x1b[%dm", 30+fg, 40+bg);
                 printf("#%s", note.tags[tag_i]);
-                //Disable all ANSI
-                printf("\x1b[0m");
+                printf("\x1b[0m"); //Disable all ANSI
             }
             putchar('\n');
         }
