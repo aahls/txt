@@ -34,6 +34,10 @@ THE SOFTWARE.
 int atoi_altfail(const char *str);
 int hash_str(const char *str, int variation);
 
+void mode_remove(int argc, char **argv, note_db_t *db);
+void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_order);
+void mode_add(int argc, char **argv, note_db_t *db, int importance);
+
 int main(int argc, char **argv){
     int remove=0;
     int longout=0;
@@ -46,7 +50,6 @@ int main(int argc, char **argv){
     char opt;
 
     note_db_t db;
-    note_t note;
 
     chdir(getenv("HOME"));
     if(access(NOTESFILE, F_OK) != -1)
@@ -93,76 +96,89 @@ int main(int argc, char **argv){
     }
 
     if(remove){
-        int i;
-        for(i=optind;i<argc;i++){
-            int id=atoi_altfail(argv[i]);
-            if(id==-1 || id<0){
-                printf("Bad ID '%s' specified. Ignoring\n", argv[i]);
-                continue;
-            }
-            if(del_note_id(&db, id)==-1){
-                printf("No note with ID %d found. Ignoring.\n", id);
-            }
-        }
+        mode_remove(argc, argv, &db);
         save_db(&db, NOTESFILE);
     }else if(argc==optind){
-        int i;
-        sort_notes(&db, sort);
-        for(i=0;i<db.len;i++){
-            int tag_i;
-            if(invert_order) note=*get_note(&db, db.len-1-i);
-            else note=*get_note(&db, i);
-
-            if(note.importance>7)
-                //ANSI red and bright
-                printf("\x1b[31m\x1b[1m");
-            if(longout){
-                char date_string[20];
-                struct tm *time=localtime(&note.created);
-                strftime(date_string, 20, "%F %H:%M:%S",time);
-                printf("%2d %d %s %s",
-                        note.id, note.importance,
-                        date_string, note.text);
-            }else{
-                printf("%2d %s", note.id, note.text);
-            }
-            //Disable all ANSI
-            printf("\x1b[0m");
-            for(tag_i=0;tag_i<note.ntags;tag_i++){
-                int fg, bg;
-                putchar(' ');
-
-                fg=(hash_str(note.tags[tag_i], 22))%8;
-                bg=(hash_str(note.tags[tag_i], 19))%8;
-                if(fg==bg) bg=(bg==7 ? bg+1 : bg-1);
-
-                //ANSI: set foreground and background colors
-                printf("\x1b[%dm\x1b[%dm", 30+fg, 40+bg);
-                printf("#%s", note.tags[tag_i]);
-                printf("\x1b[0m"); //Disable all ANSI
-            }
-            putchar('\n');
-        }
+        mode_list(&db, longout, sort, invert_order);
     }else{
-        int i;
-        note=make_note("");
-        for(i=optind;i<argc;i++){
-            if(argv[i][0]=='#'){
-                //Increment pointer to skip past hash
-                add_tag(&note, ++argv[i]);
-            }else{
-                append_note_text(&note, argv[i]);
-                append_note_text(&note, " ");
-            }
-        }
-        note.importance=importance;
-        add_note(&db, note);
+        mode_add(argc, argv, &db, importance);
         save_db(&db, NOTESFILE);
     }
 
     free_db(&db);
 
     return 0;
+}
+
+void mode_remove(int argc, char **argv, note_db_t *db){
+    int i;
+    for(i=optind;i<argc;i++){
+        int id=atoi_altfail(argv[i]);
+        if(id==-1 || id<0){
+            printf("Bad ID '%s' specified. Ignoring\n", argv[i]);
+            continue;
+        }
+        if(del_note_id(db, id)==-1){
+            printf("No note with ID %d found. Ignoring.\n", id);
+        }
+    }
+}
+
+void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_order){
+    int i;
+    note_t note;
+    sort_notes(db, sort);
+    for(i=0;i<db->len;i++){
+        int tag_i;
+        if(invert_order) note=*get_note(db, db->len-1-i);
+        else note=*get_note(db, i);
+
+        if(note.importance>7)
+            //ANSI red and bright
+            printf("\x1b[31m\x1b[1m");
+        if(longout){
+            char date_string[20];
+            struct tm *time=localtime(&note.created);
+            strftime(date_string, 20, "%F %H:%M:%S",time);
+            printf("%2d %d %s %s",
+                    note.id, note.importance,
+                    date_string, note.text);
+        }else{
+            printf("%2d %s", note.id, note.text);
+        }
+        //Disable all ANSI
+        printf("\x1b[0m");
+        for(tag_i=0;tag_i<note.ntags;tag_i++){
+            int fg, bg;
+            putchar(' ');
+
+            fg=(hash_str(note.tags[tag_i], 22))%8;
+            bg=(hash_str(note.tags[tag_i], 19))%8;
+            if(fg==bg) bg=(bg==7 ? bg+1 : bg-1);
+
+            //ANSI: set foreground and background colors
+            printf("\x1b[%dm\x1b[%dm", 30+fg, 40+bg);
+            printf("#%s", note.tags[tag_i]);
+            printf("\x1b[0m"); //Disable all ANSI
+        }
+        putchar('\n');
+    }
+}
+
+void mode_add(int argc, char **argv, note_db_t *db, int importance){
+    int i;
+    note_t note=make_note("");
+    for(i=optind;i<argc;i++){
+        if(argv[i][0]=='#'){
+            //Increment pointer to skip past hash
+            add_tag(&note, ++argv[i]);
+        }else{
+            append_note_text(&note, argv[i]);
+            append_note_text(&note, " ");
+        }
+    }
+    note.importance=importance;
+    add_note(db, note);
 }
 
 //Returns -1 instead of 0 on failure, which is easier to check for
