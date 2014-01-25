@@ -173,7 +173,8 @@ int del_tag(note_t *note, char *tag){
     for(i=0;i<note->ntags;i++){
         if(!strcmp(note->tags[i], tag)){
             free(note->tags[i]);
-            memmove(note->tags[0], note->tags[i], note->ntags-i);
+            memmove(&(note->tags[i]), &(note->tags[i+1]),
+                sizeof(note->tags[0])*(note->ntags-(i+1)));
             note->ntags--;
             return 1;
         }

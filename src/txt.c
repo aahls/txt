@@ -38,10 +38,14 @@ note_db_t get_db(void);
 void mode_remove(int argc, char **argv, note_db_t *db);
 void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_order);
 void mode_add(int argc, char **argv, note_db_t *db, int importance);
+void mode_tag_edit(int argc, char **argv, note_db_t *db, int remove);
 
 int main(int argc, char **argv){
     int remove=0;
     int longout=0;
+
+    int tag_add=0;
+    int tag_del=0;
 
     int importance=5;
 
@@ -52,7 +56,7 @@ int main(int argc, char **argv){
 
     note_db_t db=get_db();
 
-    while((opt=getopt(argc, argv, "vlri:Is:")) != -1){
+    while((opt=getopt(argc, argv, "vlri:Is:AR")) != -1){
         switch(opt){
             case 'v':
                 printf("txt v%s\n", VERSION);
@@ -87,11 +91,26 @@ int main(int argc, char **argv){
             case 'I':
                 invert_order=1;
                 break;
+            case 'A':
+                tag_add=1;
+                break;
+            case 'R':
+                tag_del=1;
+                break;
         }
+    }
+
+    //Options can not be used at the same time
+    if(remove+tag_add+tag_del>1){
+        puts("Options -r, -A and/or -R can not be used simultaneously.");
+        return 1;
     }
 
     if(remove){
         mode_remove(argc, argv, &db);
+        save_db(&db, NOTESFILE);
+    }else if(tag_add || tag_del){
+        mode_tag_edit(argc, argv, &db, tag_del);
         save_db(&db, NOTESFILE);
     }else if(argc==optind){
         mode_list(&db, longout, sort, invert_order);
@@ -182,6 +201,35 @@ void mode_add(int argc, char **argv, note_db_t *db, int importance){
     }
     note.importance=importance;
     add_note(db, note);
+}
+
+void mode_tag_edit(int argc, char **argv, note_db_t *db, int remove){
+    int i, tag_i=0, id_i=0;
+    char **tags=(char **) malloc(sizeof(char *)*(argc-optind));
+    int *ids=(int *) malloc(sizeof(int *)*(argc-optind));
+    for(i=optind;i<argc;i++){
+        if(argv[i][0]=='#'){
+            //Point to characters just after the hash
+            tags[tag_i]=argv[i]+1;
+            tag_i++;
+        }else if((ids[id_i]=atoi_altfail(argv[i]))!=-1){
+            id_i++;
+        }else{
+            printf("%s is neither a tag (specified with a # sign) or an ID. Ignoring.\n", argv[i]);
+        }
+    }
+
+    for(i=0;i<id_i;i++){
+        int j;
+        note_t *note=get_note_id(db, ids[i]);
+        for(j=0;j<tag_i;j++){
+            if(remove) del_tag(note, tags[j]);
+            else add_tag(note, tags[j]);
+        }
+    }
+
+    free(tags);
+    free(ids);
 }
 
 //Returns -1 instead of 0 on failure, which is easier to check for
