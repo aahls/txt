@@ -36,7 +36,7 @@ int hash_str(const char *str, int variation);
 note_db_t get_db(void);
 
 void mode_remove(int argc, char **argv, note_db_t *db);
-void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_order);
+void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_order, char *tag);
 void mode_add(int argc, char **argv, note_db_t *db, int importance);
 void mode_tag_edit(int argc, char **argv, note_db_t *db, int remove);
 
@@ -46,6 +46,7 @@ int main(int argc, char **argv){
 
     int tag_add=0;
     int tag_del=0;
+    char *tag_filter=NULL;
 
     int importance=5;
 
@@ -56,7 +57,7 @@ int main(int argc, char **argv){
 
     note_db_t db=get_db();
 
-    while((opt=getopt(argc, argv, "vlri:Is:AR")) != -1){
+    while((opt=getopt(argc, argv, "vlri:Is:ARt:")) != -1){
         switch(opt){
             case 'v':
                 printf("txt v%s\n", VERSION);
@@ -72,6 +73,14 @@ int main(int argc, char **argv){
                 if(importance<1 || importance>10){
                     puts("Bad importance specified, must be integer between" \
                          "1 and 10 (inclusive)");
+                    exit(9);
+                }
+                break;
+            case 't':
+                if(optarg[0]=='#'){
+                    tag_filter=optarg+1;
+                }else{
+                    printf("Invalid tag %s (must be specified with a # sign).", optarg);
                     exit(9);
                 }
                 break;
@@ -103,7 +112,7 @@ int main(int argc, char **argv){
     //Options can not be used at the same time
     if(remove+tag_add+tag_del>1){
         puts("Options -r, -A and/or -R can not be used simultaneously.");
-        return 1;
+        exit(9);
     }
 
     if(remove){
@@ -113,7 +122,7 @@ int main(int argc, char **argv){
         mode_tag_edit(argc, argv, &db, tag_del);
         save_db(&db, NOTESFILE);
     }else if(argc==optind){
-        mode_list(&db, longout, sort, invert_order);
+        mode_list(&db, longout, sort, invert_order, tag_filter);
     }else{
         mode_add(argc, argv, &db, importance);
         save_db(&db, NOTESFILE);
@@ -146,7 +155,7 @@ void mode_remove(int argc, char **argv, note_db_t *db){
     }
 }
 
-void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_order){
+void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_order, char *tag){
     int i;
     note_t note;
     sort_notes(db, sort);
@@ -154,6 +163,8 @@ void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_ord
         int tag_i;
         if(invert_order) note=*get_note(db, db->len-1-i);
         else note=*get_note(db, i);
+
+        if(tag!=NULL && !has_tag(&note, tag)) continue;
 
         if(note.importance>7)
             //ANSI red and bright
