@@ -32,7 +32,6 @@ THE SOFTWARE.
 #define NOTESFILE   ".txtdb.csv"
 
 int atoi_altfail(const char *str);
-void print_usage(void);
 int hash_str(const char *str, int variation);
 
 int main(int argc, char **argv){
