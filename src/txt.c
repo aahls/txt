@@ -33,6 +33,7 @@ THE SOFTWARE.
 
 int atoi_altfail(const char *str);
 int hash_str(const char *str, int variation);
+note_db_t get_db(void);
 
 void mode_remove(int argc, char **argv, note_db_t *db);
 void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_order);
@@ -49,13 +50,7 @@ int main(int argc, char **argv){
 
     char opt;
 
-    note_db_t db;
-
-    chdir(getenv("HOME"));
-    if(access(NOTESFILE, F_OK) != -1)
-        db=load_db(NOTESFILE);
-    else
-        db=empty_db();
+    note_db_t db=get_db();
 
     while((opt=getopt(argc, argv, "vlri:Is:")) != -1){
         switch(opt){
@@ -108,6 +103,14 @@ int main(int argc, char **argv){
     free_db(&db);
 
     return 0;
+}
+
+note_db_t get_db(){
+    chdir(getenv("HOME"));
+    if(access(NOTESFILE, F_OK) != -1)
+        return load_db(NOTESFILE);
+    else
+        return empty_db();
 }
 
 void mode_remove(int argc, char **argv, note_db_t *db){
