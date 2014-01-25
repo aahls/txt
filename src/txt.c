@@ -199,7 +199,7 @@ void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_ord
 }
 
 void mode_add(int argc, char **argv, note_db_t *db, int importance){
-    int i;
+    int i, has_text=0;
     note_t note=make_note("");
     for(i=optind;i<argc;i++){
         if(argv[i][0]=='#'){
@@ -208,7 +208,12 @@ void mode_add(int argc, char **argv, note_db_t *db, int importance){
         }else{
             append_note_text(&note, argv[i]);
             append_note_text(&note, " ");
+            has_text=1;
         }
+    }
+    if(!has_text){
+        puts("Can't create note without text.");
+        exit(9);
     }
     note.importance=importance;
     add_note(db, note);
