@@ -26,19 +26,8 @@ THE SOFTWARE.
 #include <getopt.h>
 #include <unistd.h>
 
+#include "txt.h"
 #include "db.h"
-
-#define VERSION     "1.0.0" 
-#define NOTESFILE   ".txtdb.csv"
-
-int atoi_altfail(const char *str);
-int hash_str(const char *str, int variation);
-note_db_t get_db(void);
-
-void mode_remove(int argc, char **argv, note_db_t *db);
-void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_order, char *tag);
-void mode_add(int argc, char **argv, note_db_t *db, int importance);
-void mode_tag_edit(int argc, char **argv, note_db_t *db, int remove);
 
 int main(int argc, char **argv){
     int remove=0;
