@@ -49,7 +49,6 @@ void set_note_text(note_t *note, const char *text){
 void append_note_text(note_t *note, const char *text){
     note->text=realloc(note->text, sizeof(char)*(strlen(text)+strlen(note->text)+2));
     strcat(note->text, text);
-
 }
 
 note_db_t empty_db(){
