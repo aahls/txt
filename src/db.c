@@ -160,9 +160,11 @@ int sort_notes(note_db_t *db, enum sort_policy policy){
 
 int add_tag(note_t *note, char *tag){
     if(has_tag(note, tag)) return 1;
+
     note->tags=realloc(note->tags, sizeof(char *)*(note->ntags+1));
     note->tags[note->ntags]=(char *) malloc((strlen(tag)+1)*sizeof(char));
     strcpy(note->tags[note->ntags], tag);
+
     note->ntags++;
     return 0;
 }
