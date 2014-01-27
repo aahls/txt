@@ -39,14 +39,16 @@ int main(int argc, char **argv){
 
     int importance=5;
 
+    enum db which_db=DB_STD;
+
     int invert_order=0;
     enum sort_policy sort=ID;
 
     char opt;
 
-    note_db_t db=get_db();
+    note_db_t db;
 
-    while((opt=getopt(argc, argv, "vlri:Is:ARt:")) != -1){
+    while((opt=getopt(argc, argv, "vlri:Is:ARt:GD")) != -1){
         switch(opt){
             case 'v':
                 printf("txt v%s\n", VERSION);
@@ -95,14 +97,20 @@ int main(int argc, char **argv){
             case 'R':
                 tag_del=1;
                 break;
+            case 'G':
+                which_db=DB_GLOBAL;
+                break;
+            case 'D':
+                which_db=DB_DIR;
+                break;
         }
     }
-
-    //Options can not be used at the same time
     if(remove+tag_add+tag_del>1){
         puts("Options -r, -A and/or -R can not be used simultaneously.");
         exit(9);
     }
+
+    db=get_db(which_db);
 
     if(remove){
         mode_remove(argc, argv, &db);
@@ -122,8 +130,9 @@ int main(int argc, char **argv){
     return 0;
 }
 
-note_db_t get_db(){
-    chdir(getenv("HOME"));
+note_db_t get_db(enum db which_db){
+    if((which_db==DB_STD && access(NOTESFILE, F_OK) == -1) || which_db==DB_GLOBAL)
+        chdir(getenv("HOME"));
     if(access(NOTESFILE, F_OK) != -1)
         return load_db(NOTESFILE);
     else

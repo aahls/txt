@@ -27,9 +27,11 @@ THE SOFTWARE.
 #define VERSION     "1.0.0" 
 #define NOTESFILE   ".txtdb.csv"
 
+enum db { DB_STD, DB_GLOBAL, DB_DIR };
+
 int atoi_altfail(const char *str);
 int hash_str(const char *str, int variation);
-note_db_t get_db(void);
+note_db_t get_db(enum db which_db);
 
 void mode_remove(int argc, char **argv, note_db_t *db);
 void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_order, char *tag);
