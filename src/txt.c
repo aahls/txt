@@ -130,9 +130,23 @@ int main(int argc, char **argv){
     return 0;
 }
 
+/*
+This sets the working directory. save_db() calls rely on the working directory
+being unchanged after the call. Probably shouldn't rely on that side effect
+*/
 note_db_t get_db(enum db which_db){
-    if((which_db==DB_STD && access(NOTESFILE, F_OK) == -1) || which_db==DB_GLOBAL)
+    if(which_db==DB_GLOBAL){
         chdir(getenv("HOME"));
+    }else if(which_db==DB_STD){
+        char cwd[1024];
+        while(access(NOTESFILE, F_OK) == -1){
+            if(!strcmp(getcwd(cwd, 1024), "/")){
+                chdir(getenv("HOME"));
+                break;
+            }
+            chdir("..");
+        }
+    }
     if(access(NOTESFILE, F_OK) != -1)
         return load_db(NOTESFILE);
     else
