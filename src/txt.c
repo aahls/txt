@@ -219,7 +219,7 @@ void mode_add(int argc, char **argv, note_db_t *db, int importance){
             add_tag(&note, ++argv[i]);
         }else{
             append_note_text(&note, argv[i]);
-            append_note_text(&note, " ");
+            if(i!=argc-2) append_note_text(&note, " ");
             has_text=1;
         }
     }
