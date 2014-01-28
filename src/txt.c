@@ -178,9 +178,14 @@ void mode_list(note_db_t *db, int longout, enum sort_policy sort, int invert_ord
 
         if(tag!=NULL && !has_tag(&note, tag)) continue;
 
-        if(note.importance>7)
-            //ANSI red and bright
-            printf("\x1b[31m\x1b[1m");
+        if(note.importance>5){
+            //ANSI red
+            printf("\x1b[31m");
+            if(note.importance>7)
+                //ANSI bright
+                printf("\x1b[1m");
+        }
+
         if(longout){
             char date_string[20];
             struct tm *time=localtime(&note.created);
