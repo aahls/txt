@@ -148,9 +148,9 @@ int sort_notes(note_db_t *db, enum sort_policy policy){
     for(i=1;i<db->len;i++){
         j=i;
         while(j>0){
-            if(policy==IMPORTANCE && !(db->notes[j].importance<db->notes[j-1].importance)) break;
-            else if(policy==CREATED && !(db->notes[j].created<db->notes[j-1].created)) break;
-            else if(policy==ID && !(db->notes[j].id<db->notes[j-1].id)) break;
+            if(policy==IMPORTANCE && !(db->notes[j].importance>db->notes[j-1].importance)) break;
+            else if(policy==CREATED && !(db->notes[j].created>db->notes[j-1].created)) break;
+            else if(policy==ID && !(db->notes[j].id>db->notes[j-1].id)) break;
             swap_notes(db, j, j-1);
             j--;
         }
