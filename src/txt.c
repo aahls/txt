@@ -224,10 +224,12 @@ void mode_add(int argc, char **argv, note_db_t *db, int importance){
             add_tag(&note, ++argv[i]);
         }else{
             append_note_text(&note, argv[i]);
-            if(i!=argc-2) append_note_text(&note, " ");
+            append_note_text(&note, " ");
             has_text=1;
         }
     }
+    //Change extra space at end of text to NUL
+    note.text[strlen(note.text)-1]='\0';
     if(!has_text){
         puts("Can't create note without text.");
         exit(9);
