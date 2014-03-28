@@ -6,6 +6,8 @@ Creating a new note, saying, for instance, "hello world", is as simple as typing
 
 Beyond this, *txt* supports tags, notes specific for the current working directory, specifying importance (notes with high importance levels will be highlighted) and sorting (by creation time etc.). This is a pretty spartan set of features, however, this is what *txt* tries to be: simple.
 
+To install, download the sources and in the `src/` directory run `make` followed by `make install` (as root).
+
 Creating notes
 --------------
 To **create a note** type `txt` followed by whatever text you want your note to contain. For instance, if you want to make a note to remind yourself to buy milk, type `txt buy milk`. Any **tags can be added** by specifying them using hashtags, for instance `txt buy milk #shopping`. Any number of tags can be added and the tags are automatically colored.
